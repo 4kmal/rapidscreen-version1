@@ -1,0 +1,237 @@
+/* PlayStation Game Menu CSS */
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@100;300&display=swap");
+
+:root {
+  --ps-clear-blue: #0055de;
+  --ps-light-blue: #003791;
+  --ps-dark-blue: #021f59;
+}
+
+.ps-menu {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-weight: 300;
+  font-family: "Roboto", sans-serif;
+  background: linear-gradient(45deg, var(--ps-clear-blue), var(--ps-light-blue));
+  z-index: 50;
+}
+
+.ps-menu.hidden {
+  display: none;
+}
+
+.ps-menu-container {
+  height: 100%;
+  transform-origin: bottom;
+}
+
+.ps-menu-container.startup {
+  transform: scale(0.8);
+  animation: psMenuZoomIn 0.2s ease-out 0.3s forwards;
+}
+
+.ps-menu-container.launch {
+  transform-origin: center;
+  animation: psMenuTravelingIn 1s ease-out 0.2s forwards;
+}
+
+@keyframes psMenuZoomIn {
+  from {
+    transform: scale(0.8);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes psMenuTravelingIn {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50%, 100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+.ps-tile-list {
+  display: flex;
+  flex-flow: row nowrap;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  padding-top: 32px;
+  padding-left: 20px;
+  transition: transform 0.1s ease-out;
+}
+
+.ps-tile-list__item {
+  margin-right: 2px;
+  flex-shrink: 0;
+}
+
+.ps-tile-list__item:last-child {
+  margin: 0;
+}
+
+.ps-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 55px;
+  transition: all 0.1s ease-in;
+  outline: none;
+  z-index: 1;
+  color: white;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  padding: 0;
+}
+
+.ps-tile:focus,
+.ps-tile.active {
+  width: 70px;
+  height: 100px;
+  margin: 0 2px;
+}
+
+.ps-tile:focus::before,
+.ps-tile.active::before {
+  content: "";
+  display: block;
+  position: absolute;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  transform-origin: center;
+  outline: 2px solid white;
+  animation: psBorderExpandFade 4s infinite;
+}
+
+.ps-tile:focus .ps-tile__action,
+.ps-tile.active .ps-tile__action {
+  display: flex;
+}
+
+.ps-tile:focus .ps-tile__title,
+.ps-tile.active .ps-tile__title {
+  display: block;
+}
+
+@keyframes psBorderExpandFade {
+  0%, 60%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  80% {
+    transform: scale(1.04);
+    opacity: 0;
+  }
+  90% {
+    transform: scale(0.96);
+    opacity: 0;
+  }
+}
+
+.ps-tile__content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  background: linear-gradient(var(--ps-light-blue), var(--ps-dark-blue));
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+}
+
+.ps-tile__content--core {
+  background: linear-gradient(rgba(255, 255, 255, 0.2), var(--ps-clear-blue), var(--ps-light-blue));
+}
+
+.ps-tile__content svg {
+  fill: white;
+  width: 60%;
+  height: 60%;
+}
+
+.ps-tile__content img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ps-tile__action {
+  display: none;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 16px;
+  background-color: var(--ps-clear-blue);
+  font-size: 8px;
+  font-weight: 300;
+}
+
+.ps-tile__title {
+  display: none;
+  position: absolute;
+  left: calc(100% + 6px);
+  bottom: 0;
+  width: 200%;
+  margin: 0;
+  font-size: 10px;
+  font-weight: 100;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.ps-tile__title-reveal {
+  display: block;
+  transform: translateY(100%);
+}
+
+.ps-tile__title-reveal--revealed {
+  animation: psSlideUp 0.1s ease-out 0.1s forwards;
+}
+
+@keyframes psSlideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* Navigation hint */
+.ps-menu-hint {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 7px;
+  color: rgba(255, 255, 255, 0.7);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.ps-menu-hint span {
+  display: inline-block;
+  padding: 1px 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+  margin: 0 2px;
+}
+

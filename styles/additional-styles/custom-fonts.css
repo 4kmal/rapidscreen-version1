@@ -1,0 +1,98 @@
+/* Custom Font Imports for Font Toggle Feature */
+
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Reddit+Mono:wght@200..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap');
+
+/* Departure Mono - from CodePen assets */
+@font-face {
+  font-family: 'Departure Mono';
+  src: url('https://assets.codepen.io/605876/DepartureMono-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ===================================
+   Font Toggle System - Title Fonts
+   =================================== */
+
+/* CSS Variables for dynamic font switching */
+:root {
+  --title-font: 'SuisseIntl', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --title-font-weight: 600;
+  --title-letter-spacing: -0.02em;
+}
+
+/* Font Option 1: Default (SuisseIntl) */
+[data-title-font="default"] {
+  --title-font: 'SuisseIntl', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --title-font-weight: 600;
+  --title-letter-spacing: -0.02em;
+}
+
+/* Font Option 2: Departure Mono - Pixelated retro style */
+[data-title-font="departure-mono"] {
+  --title-font: 'Departure Mono', 'Reddit Mono', monospace;
+  --title-font-weight: 400;
+  --title-letter-spacing: 0.02em;
+}
+
+/* Font Option 3: Space Grotesk - Modern geometric sans */
+[data-title-font="space-grotesk"] {
+  --title-font: 'Space Grotesk', 'SuisseIntl', sans-serif;
+  --title-font-weight: 700;
+  --title-letter-spacing: -0.03em;
+}
+
+/* ===================================
+   Apply Title Font to Section Headers
+   =================================== */
+
+/* Target all section titles and headings when font toggle is active */
+[data-title-font]:not([data-title-font="default"]) .section-title,
+[data-title-font]:not([data-title-font="default"]) .text-title-h1,
+[data-title-font]:not([data-title-font="default"]) .text-title-h2,
+[data-title-font]:not([data-title-font="default"]) .title-h1,
+[data-title-font]:not([data-title-font="default"]) .title-h2,
+[data-title-font]:not([data-title-font="default"]) h1.section-title-text,
+[data-title-font]:not([data-title-font="default"]) h2.section-title-text,
+[data-title-font]:not([data-title-font="default"]) [data-font-toggle-target="true"],
+[data-title-font]:not([data-title-font="default"]) section h2,
+[data-title-font]:not([data-title-font="default"]) section h1 {
+  font-family: var(--title-font) !important;
+  font-weight: var(--title-font-weight) !important;
+  letter-spacing: var(--title-letter-spacing) !important;
+  text-transform: uppercase;
+}
+
+/* Departure Mono specific styling - pixelated effect */
+[data-title-font="departure-mono"] .text-title-h1,
+[data-title-font="departure-mono"] .text-title-h2,
+[data-title-font="departure-mono"] .title-h1,
+[data-title-font="departure-mono"] .title-h2,
+[data-title-font="departure-mono"] section h1,
+[data-title-font="departure-mono"] section h2 {
+  line-height: 1.15 !important;
+}
+
+/* Space Grotesk specific styling */
+[data-title-font="space-grotesk"] .text-title-h1,
+[data-title-font="space-grotesk"] .text-title-h2,
+[data-title-font="space-grotesk"] .title-h1,
+[data-title-font="space-grotesk"] .title-h2,
+[data-title-font="space-grotesk"] section h1,
+[data-title-font="space-grotesk"] section h2 {
+  text-transform: none;
+}
+
+/* Smooth transition when switching fonts */
+.text-title-h1,
+.text-title-h2,
+.title-h1,
+.title-h2,
+section h1,
+section h2 {
+  transition: font-family 0.3s ease, letter-spacing 0.3s ease;
+}
+

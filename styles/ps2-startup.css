@@ -1,0 +1,439 @@
+/* PlayStation 2 Startup Animation - Adapted for Game Boy screen */
+@import url('https://fonts.googleapis.com/css?family=Play&display=swap');
+
+:root {
+  --ps2-duration: 8s;
+  --ps2-grey: #616A92;
+  --ps2-dark: #323641;
+  --ps2-light: #8690B5;
+  --ps2-depth: 20%;
+  --ps2-cube-inner-shadow: inset 0 0 1vw rgba(0, 255, 255, 0.07);
+}
+
+.ps2-screen {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-style: preserve-3d;
+  perspective: 400px;
+  overflow: hidden;
+  background: black;
+  font-family: 'Play', sans-serif;
+  z-index: 100;
+}
+
+.ps2-screen.hidden {
+  display: none;
+}
+
+.ps2-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  padding: 1%;
+  padding-top: 10%;
+  transform-style: preserve-3d;
+  animation: ps2-enter var(--ps2-duration) cubic-bezier(1, 0, 0.4, 1) forwards;
+}
+
+.ps2-inner-bg {
+  background-image: url(https://res.cloudinary.com/dhpaysqxb/image/upload/v1568580561/nebula_prju57.png);
+  background-size: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  transform: translateZ(-30%) scale(1.4);
+  opacity: 0.8;
+}
+
+.ps2-box-container {
+  width: calc(100% / 14);
+  padding: 1%;
+  position: relative;
+  z-index: 100;
+  transform-style: preserve-3d;
+}
+
+.ps2-box {
+  width: 100%;
+  padding-top: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+}
+
+.ps2-box .top,
+.ps2-box .bottom,
+.ps2-box .left,
+.ps2-box .right {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.ps2-box .top {
+  background: linear-gradient(to top, rgba(150, 160, 190, 0.9), rgba(0, 0, 0, 0));
+  bottom: 100%;
+  left: 0;
+  height: var(--ps2-depth);
+  transform-origin: 100% 100%;
+  transform: rotateX(90deg);
+  box-shadow: var(--ps2-cube-inner-shadow);
+}
+
+.ps2-box .bottom {
+  background: linear-gradient(to bottom, rgba(110, 120, 150, 0.9), rgba(0, 0, 0, 0));
+  top: 100%;
+  left: 0;
+  height: var(--ps2-depth);
+  transform-origin: 0% 0%;
+  transform: rotateX(-90deg);
+  box-shadow: var(--ps2-cube-inner-shadow);
+}
+
+.ps2-box .left {
+  background: linear-gradient(to left, rgba(130, 140, 170, 0.9), rgba(0, 0, 0, 0));
+  top: 0;
+  right: 100%;
+  width: var(--ps2-depth);
+  transform-origin: 100% 100%;
+  transform: rotateY(-90deg);
+  box-shadow: var(--ps2-cube-inner-shadow);
+}
+
+.ps2-box .right {
+  background: linear-gradient(to right, rgba(130, 140, 170, 0.9), rgba(0, 0, 0, 0));
+  top: 0;
+  left: 100%;
+  width: var(--ps2-depth);
+  transform-origin: 0% 0%;
+  transform: rotateY(90deg);
+  box-shadow: var(--ps2-cube-inner-shadow);
+}
+
+/* Content overlay */
+.ps2-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  color: white;
+  background: transparent;
+  z-index: 200;
+  animation: ps2-content var(--ps2-duration) forwards;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.ps2-copyright {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.5rem;
+  text-shadow: black 0px 0px 3px;
+  opacity: 0;
+  animation: ps2-copyright var(--ps2-duration) linear forwards;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ps2-branding {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.2rem;
+  font-weight: bold;
+  opacity: 0;
+  animation: ps2-branding var(--ps2-duration) cubic-bezier(0, 0.74, 0.46, 1) forwards;
+  white-space: nowrap;
+}
+
+.ps2-branding .is-small {
+  font-size: 0.3em;
+  vertical-align: super;
+}
+
+/* Particles */
+.ps2-particles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 200;
+  pointer-events: none;
+}
+
+.ps2-particles span {
+  display: block;
+  height: 2px;
+  width: 2px;
+  background: white;
+  position: absolute;
+  border-radius: 50%;
+}
+
+.ps2-particles span:nth-child(1) {
+  left: 70%;
+  top: 70%;
+  box-shadow: 0 0 8px 3px rgba(255, 0, 0, 0.8);
+  animation: ps2-particle-1 calc(var(--ps2-duration) / 2) cubic-bezier(0, 0.74, 0.46, 1) forwards;
+}
+
+.ps2-particles span:nth-child(2) {
+  left: 70%;
+  top: 50%;
+  box-shadow: 0 0 8px 3px rgba(0, 255, 0, 0.8);
+  animation: ps2-particle-2 calc(var(--ps2-duration) / 2) cubic-bezier(0, 0.74, 0.46, 1) forwards;
+}
+
+.ps2-particles span:nth-child(3) {
+  left: 15%;
+  top: 75%;
+  box-shadow: 0 0 8px 3px rgba(0, 0, 255, 0.8);
+  animation: ps2-particle-3 calc(var(--ps2-duration) / 2) cubic-bezier(0, 0.74, 0.46, 1) forwards;
+}
+
+/* Hidden boxes pattern */
+.ps2-box-container:nth-child(41) .ps2-box,
+.ps2-box-container:nth-child(40) .ps2-box,
+.ps2-box-container:nth-child(47) .ps2-box,
+.ps2-box-container:nth-child(48) .ps2-box,
+.ps2-box-container:nth-child(46) .ps2-box,
+.ps2-box-container:nth-child(95) .ps2-box,
+.ps2-box-container:nth-child(94) .ps2-box,
+.ps2-box-container:nth-child(102) .ps2-box,
+.ps2-box-container:nth-child(101) .ps2-box {
+  visibility: hidden;
+}
+
+/* Keyframes */
+@keyframes ps2-enter {
+  0% {
+    transform: rotate(-20deg);
+  }
+  60%, 100% {
+    transform: rotate(100deg) scale(4);
+  }
+}
+
+@keyframes ps2-copyright {
+  0%, 5% {
+    opacity: 0;
+  }
+  10%, 35% {
+    opacity: 1;
+  }
+  40%, 100% {
+    opacity: 0;
+  }
+}
+
+@keyframes ps2-content {
+  0% {
+    background-color: black;
+  }
+  5%, 43% {
+    background: transparent;
+  }
+  48%, 100% {
+    background-color: black;
+  }
+}
+
+@keyframes ps2-branding {
+  0%, 65% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.5);
+  }
+  68%, 93% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  96%, 100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.5);
+  }
+}
+
+@keyframes ps2-particle-1 {
+  0% {
+    opacity: 0;
+    transform: none;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-60px, -50px);
+    opacity: 0;
+  }
+}
+
+@keyframes ps2-particle-2 {
+  0% {
+    opacity: 0;
+    transform: none;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-100px, 25px);
+    opacity: 0;
+  }
+}
+
+@keyframes ps2-particle-3 {
+  0% {
+    opacity: 0;
+    transform: none;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(110px, -50px);
+    opacity: 0;
+  }
+}
+
+/* Box depth variations - pre-computed random values */
+.ps2-box-container:nth-child(1) .ps2-box { transform: translateZ(-15%); background-color: rgba(60, 65, 80, 0.95); }
+.ps2-box-container:nth-child(2) .ps2-box { transform: translateZ(-8%); background-color: rgba(75, 80, 100, 0.95); }
+.ps2-box-container:nth-child(3) .ps2-box { transform: translateZ(-18%); background-color: rgba(50, 55, 70, 0.95); }
+.ps2-box-container:nth-child(4) .ps2-box { transform: translateZ(-5%); background-color: rgba(85, 90, 110, 0.95); }
+.ps2-box-container:nth-child(5) .ps2-box { transform: translateZ(-12%); background-color: rgba(65, 70, 90, 0.95); }
+.ps2-box-container:nth-child(6) .ps2-box { transform: translateZ(-20%); background-color: rgba(45, 50, 65, 0.95); }
+.ps2-box-container:nth-child(7) .ps2-box { transform: translateZ(-3%); background-color: rgba(90, 95, 115, 0.95); }
+.ps2-box-container:nth-child(8) .ps2-box { transform: translateZ(-16%); background-color: rgba(55, 60, 75, 0.95); }
+.ps2-box-container:nth-child(9) .ps2-box { transform: translateZ(-9%); background-color: rgba(70, 75, 95, 0.95); }
+.ps2-box-container:nth-child(10) .ps2-box { transform: translateZ(-14%); background-color: rgba(62, 67, 85, 0.95); }
+.ps2-box-container:nth-child(11) .ps2-box { transform: translateZ(-7%); background-color: rgba(78, 83, 105, 0.95); }
+.ps2-box-container:nth-child(12) .ps2-box { transform: translateZ(-19%); background-color: rgba(48, 53, 68, 0.95); }
+.ps2-box-container:nth-child(13) .ps2-box { transform: translateZ(-2%); background-color: rgba(92, 97, 118, 0.95); }
+.ps2-box-container:nth-child(14) .ps2-box { transform: translateZ(-11%); background-color: rgba(67, 72, 92, 0.95); }
+.ps2-box-container:nth-child(15) .ps2-box { transform: translateZ(-17%); background-color: rgba(52, 57, 72, 0.95); }
+.ps2-box-container:nth-child(16) .ps2-box { transform: translateZ(-6%); background-color: rgba(82, 87, 108, 0.95); }
+.ps2-box-container:nth-child(17) .ps2-box { transform: translateZ(-13%); background-color: rgba(63, 68, 88, 0.95); }
+.ps2-box-container:nth-child(18) .ps2-box { transform: translateZ(-4%); background-color: rgba(88, 93, 113, 0.95); }
+.ps2-box-container:nth-child(19) .ps2-box { transform: translateZ(-10%); background-color: rgba(68, 73, 93, 0.95); }
+.ps2-box-container:nth-child(20) .ps2-box { transform: translateZ(-16%); background-color: rgba(55, 60, 75, 0.95); }
+.ps2-box-container:nth-child(21) .ps2-box { transform: translateZ(-8%); background-color: rgba(75, 80, 100, 0.95); }
+.ps2-box-container:nth-child(22) .ps2-box { transform: translateZ(-19%); background-color: rgba(48, 53, 68, 0.95); }
+.ps2-box-container:nth-child(23) .ps2-box { transform: translateZ(-3%); background-color: rgba(90, 95, 115, 0.95); }
+.ps2-box-container:nth-child(24) .ps2-box { transform: translateZ(-15%); background-color: rgba(58, 63, 78, 0.95); }
+.ps2-box-container:nth-child(25) .ps2-box { transform: translateZ(-7%); background-color: rgba(78, 83, 105, 0.95); }
+.ps2-box-container:nth-child(26) .ps2-box { transform: translateZ(-12%); background-color: rgba(65, 70, 90, 0.95); }
+.ps2-box-container:nth-child(27) .ps2-box { transform: translateZ(-18%); background-color: rgba(50, 55, 70, 0.95); }
+.ps2-box-container:nth-child(28) .ps2-box { transform: translateZ(-5%); background-color: rgba(85, 90, 110, 0.95); }
+.ps2-box-container:nth-child(29) .ps2-box { transform: translateZ(-14%); background-color: rgba(62, 67, 85, 0.95); }
+.ps2-box-container:nth-child(30) .ps2-box { transform: translateZ(-9%); background-color: rgba(70, 75, 95, 0.95); }
+.ps2-box-container:nth-child(31) .ps2-box { transform: translateZ(-17%); background-color: rgba(52, 57, 72, 0.95); }
+.ps2-box-container:nth-child(32) .ps2-box { transform: translateZ(-2%); background-color: rgba(92, 97, 118, 0.95); }
+.ps2-box-container:nth-child(33) .ps2-box { transform: translateZ(-11%); background-color: rgba(67, 72, 92, 0.95); }
+.ps2-box-container:nth-child(34) .ps2-box { transform: translateZ(-6%); background-color: rgba(82, 87, 108, 0.95); }
+.ps2-box-container:nth-child(35) .ps2-box { transform: translateZ(-20%); background-color: rgba(45, 50, 65, 0.95); }
+.ps2-box-container:nth-child(36) .ps2-box { transform: translateZ(-13%); background-color: rgba(63, 68, 88, 0.95); }
+.ps2-box-container:nth-child(37) .ps2-box { transform: translateZ(-4%); background-color: rgba(88, 93, 113, 0.95); }
+.ps2-box-container:nth-child(38) .ps2-box { transform: translateZ(-16%); background-color: rgba(55, 60, 75, 0.95); }
+.ps2-box-container:nth-child(39) .ps2-box { transform: translateZ(-10%); background-color: rgba(68, 73, 93, 0.95); }
+.ps2-box-container:nth-child(40) .ps2-box { transform: translateZ(-8%); background-color: rgba(75, 80, 100, 0.95); }
+.ps2-box-container:nth-child(41) .ps2-box { transform: translateZ(-15%); background-color: rgba(58, 63, 78, 0.95); }
+.ps2-box-container:nth-child(42) .ps2-box { transform: translateZ(-19%); background-color: rgba(48, 53, 68, 0.95); }
+.ps2-box-container:nth-child(43) .ps2-box { transform: translateZ(-7%); background-color: rgba(78, 83, 105, 0.95); }
+.ps2-box-container:nth-child(44) .ps2-box { transform: translateZ(-3%); background-color: rgba(90, 95, 115, 0.95); }
+.ps2-box-container:nth-child(45) .ps2-box { transform: translateZ(-12%); background-color: rgba(65, 70, 90, 0.95); }
+.ps2-box-container:nth-child(46) .ps2-box { transform: translateZ(-18%); background-color: rgba(50, 55, 70, 0.95); }
+.ps2-box-container:nth-child(47) .ps2-box { transform: translateZ(-5%); background-color: rgba(85, 90, 110, 0.95); }
+.ps2-box-container:nth-child(48) .ps2-box { transform: translateZ(-14%); background-color: rgba(62, 67, 85, 0.95); }
+.ps2-box-container:nth-child(49) .ps2-box { transform: translateZ(-9%); background-color: rgba(70, 75, 95, 0.95); }
+.ps2-box-container:nth-child(50) .ps2-box { transform: translateZ(-17%); background-color: rgba(52, 57, 72, 0.95); }
+.ps2-box-container:nth-child(51) .ps2-box { transform: translateZ(-2%); background-color: rgba(92, 97, 118, 0.95); }
+.ps2-box-container:nth-child(52) .ps2-box { transform: translateZ(-11%); background-color: rgba(67, 72, 92, 0.95); }
+.ps2-box-container:nth-child(53) .ps2-box { transform: translateZ(-6%); background-color: rgba(82, 87, 108, 0.95); }
+.ps2-box-container:nth-child(54) .ps2-box { transform: translateZ(-20%); background-color: rgba(45, 50, 65, 0.95); }
+.ps2-box-container:nth-child(55) .ps2-box { transform: translateZ(-13%); background-color: rgba(63, 68, 88, 0.95); }
+.ps2-box-container:nth-child(56) .ps2-box { transform: translateZ(-4%); background-color: rgba(88, 93, 113, 0.95); }
+.ps2-box-container:nth-child(57) .ps2-box { transform: translateZ(-16%); background-color: rgba(55, 60, 75, 0.95); }
+.ps2-box-container:nth-child(58) .ps2-box { transform: translateZ(-10%); background-color: rgba(68, 73, 93, 0.95); }
+.ps2-box-container:nth-child(59) .ps2-box { transform: translateZ(-8%); background-color: rgba(75, 80, 100, 0.95); }
+.ps2-box-container:nth-child(60) .ps2-box { transform: translateZ(-15%); background-color: rgba(58, 63, 78, 0.95); }
+.ps2-box-container:nth-child(61) .ps2-box { transform: translateZ(-19%); background-color: rgba(48, 53, 68, 0.95); }
+.ps2-box-container:nth-child(62) .ps2-box { transform: translateZ(-7%); background-color: rgba(78, 83, 105, 0.95); }
+.ps2-box-container:nth-child(63) .ps2-box { transform: translateZ(-3%); background-color: rgba(90, 95, 115, 0.95); }
+.ps2-box-container:nth-child(64) .ps2-box { transform: translateZ(-12%); background-color: rgba(65, 70, 90, 0.95); }
+.ps2-box-container:nth-child(65) .ps2-box { transform: translateZ(-18%); background-color: rgba(50, 55, 70, 0.95); }
+.ps2-box-container:nth-child(66) .ps2-box { transform: translateZ(-5%); background-color: rgba(85, 90, 110, 0.95); }
+.ps2-box-container:nth-child(67) .ps2-box { transform: translateZ(-14%); background-color: rgba(62, 67, 85, 0.95); }
+.ps2-box-container:nth-child(68) .ps2-box { transform: translateZ(-9%); background-color: rgba(70, 75, 95, 0.95); }
+.ps2-box-container:nth-child(69) .ps2-box { transform: translateZ(-17%); background-color: rgba(52, 57, 72, 0.95); }
+.ps2-box-container:nth-child(70) .ps2-box { transform: translateZ(-2%); background-color: rgba(92, 97, 118, 0.95); }
+.ps2-box-container:nth-child(71) .ps2-box { transform: translateZ(-11%); background-color: rgba(67, 72, 92, 0.95); }
+.ps2-box-container:nth-child(72) .ps2-box { transform: translateZ(-6%); background-color: rgba(82, 87, 108, 0.95); }
+.ps2-box-container:nth-child(73) .ps2-box { transform: translateZ(-20%); background-color: rgba(45, 50, 65, 0.95); }
+.ps2-box-container:nth-child(74) .ps2-box { transform: translateZ(-13%); background-color: rgba(63, 68, 88, 0.95); }
+.ps2-box-container:nth-child(75) .ps2-box { transform: translateZ(-4%); background-color: rgba(88, 93, 113, 0.95); }
+.ps2-box-container:nth-child(76) .ps2-box { transform: translateZ(-16%); background-color: rgba(55, 60, 75, 0.95); }
+.ps2-box-container:nth-child(77) .ps2-box { transform: translateZ(-10%); background-color: rgba(68, 73, 93, 0.95); }
+.ps2-box-container:nth-child(78) .ps2-box { transform: translateZ(-8%); background-color: rgba(75, 80, 100, 0.95); }
+.ps2-box-container:nth-child(79) .ps2-box { transform: translateZ(-15%); background-color: rgba(58, 63, 78, 0.95); }
+.ps2-box-container:nth-child(80) .ps2-box { transform: translateZ(-19%); background-color: rgba(48, 53, 68, 0.95); }
+.ps2-box-container:nth-child(81) .ps2-box { transform: translateZ(-7%); background-color: rgba(78, 83, 105, 0.95); }
+.ps2-box-container:nth-child(82) .ps2-box { transform: translateZ(-3%); background-color: rgba(90, 95, 115, 0.95); }
+.ps2-box-container:nth-child(83) .ps2-box { transform: translateZ(-12%); background-color: rgba(65, 70, 90, 0.95); }
+.ps2-box-container:nth-child(84) .ps2-box { transform: translateZ(-18%); background-color: rgba(50, 55, 70, 0.95); }
+.ps2-box-container:nth-child(85) .ps2-box { transform: translateZ(-5%); background-color: rgba(85, 90, 110, 0.95); }
+.ps2-box-container:nth-child(86) .ps2-box { transform: translateZ(-14%); background-color: rgba(62, 67, 85, 0.95); }
+.ps2-box-container:nth-child(87) .ps2-box { transform: translateZ(-9%); background-color: rgba(70, 75, 95, 0.95); }
+.ps2-box-container:nth-child(88) .ps2-box { transform: translateZ(-17%); background-color: rgba(52, 57, 72, 0.95); }
+.ps2-box-container:nth-child(89) .ps2-box { transform: translateZ(-2%); background-color: rgba(92, 97, 118, 0.95); }
+.ps2-box-container:nth-child(90) .ps2-box { transform: translateZ(-11%); background-color: rgba(67, 72, 92, 0.95); }
+.ps2-box-container:nth-child(91) .ps2-box { transform: translateZ(-6%); background-color: rgba(82, 87, 108, 0.95); }
+.ps2-box-container:nth-child(92) .ps2-box { transform: translateZ(-20%); background-color: rgba(45, 50, 65, 0.95); }
+.ps2-box-container:nth-child(93) .ps2-box { transform: translateZ(-13%); background-color: rgba(63, 68, 88, 0.95); }
+.ps2-box-container:nth-child(94) .ps2-box { transform: translateZ(-4%); background-color: rgba(88, 93, 113, 0.95); }
+.ps2-box-container:nth-child(95) .ps2-box { transform: translateZ(-16%); background-color: rgba(55, 60, 75, 0.95); }
+.ps2-box-container:nth-child(96) .ps2-box { transform: translateZ(-10%); background-color: rgba(68, 73, 93, 0.95); }
+.ps2-box-container:nth-child(97) .ps2-box { transform: translateZ(-8%); background-color: rgba(75, 80, 100, 0.95); }
+.ps2-box-container:nth-child(98) .ps2-box { transform: translateZ(-15%); background-color: rgba(58, 63, 78, 0.95); }
+.ps2-box-container:nth-child(99) .ps2-box { transform: translateZ(-19%); background-color: rgba(48, 53, 68, 0.95); }
+.ps2-box-container:nth-child(100) .ps2-box { transform: translateZ(-7%); background-color: rgba(78, 83, 105, 0.95); }
+.ps2-box-container:nth-child(101) .ps2-box { transform: translateZ(-3%); background-color: rgba(90, 95, 115, 0.95); }
+.ps2-box-container:nth-child(102) .ps2-box { transform: translateZ(-12%); background-color: rgba(65, 70, 90, 0.95); }
+.ps2-box-container:nth-child(103) .ps2-box { transform: translateZ(-18%); background-color: rgba(50, 55, 70, 0.95); }
+.ps2-box-container:nth-child(104) .ps2-box { transform: translateZ(-5%); background-color: rgba(85, 90, 110, 0.95); }
+.ps2-box-container:nth-child(105) .ps2-box { transform: translateZ(-14%); background-color: rgba(62, 67, 85, 0.95); }
+.ps2-box-container:nth-child(106) .ps2-box { transform: translateZ(-9%); background-color: rgba(70, 75, 95, 0.95); }
+.ps2-box-container:nth-child(107) .ps2-box { transform: translateZ(-17%); background-color: rgba(52, 57, 72, 0.95); }
+.ps2-box-container:nth-child(108) .ps2-box { transform: translateZ(-2%); background-color: rgba(92, 97, 118, 0.95); }
+.ps2-box-container:nth-child(109) .ps2-box { transform: translateZ(-11%); background-color: rgba(67, 72, 92, 0.95); }
+.ps2-box-container:nth-child(110) .ps2-box { transform: translateZ(-6%); background-color: rgba(82, 87, 108, 0.95); }
+.ps2-box-container:nth-child(111) .ps2-box { transform: translateZ(-20%); background-color: rgba(45, 50, 65, 0.95); }
+.ps2-box-container:nth-child(112) .ps2-box { transform: translateZ(-13%); background-color: rgba(63, 68, 88, 0.95); }
+
