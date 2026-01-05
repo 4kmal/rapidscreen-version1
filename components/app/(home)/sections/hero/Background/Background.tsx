@@ -9,11 +9,11 @@ import CenterStar from "./_svg/CenterStar";
 export default function HomeHeroBackground() {
   return (
     <div className="overlay contain-layout pointer-events-none lg-max:hidden">
-      <div className="top-100 h-[calc(100%-99px)] border-border-faint border-y w-full left-0 absolute" />
+      <div className="top-104 h-[calc(100%-104px)] border-border-faint border-y w-full left-0 absolute" />
 
       <div className="cw-[1314px] z-[105] absolute top-0 border-x border-border-faint h-full">
         <div className="text-mono-x-small font-mono text-black-alpha-12 select-none">
-          <div className="absolute top-111 -left-1 w-102 text-center">
+          <div className="absolute top-115 -left-1 w-102 text-center">
             {" "}
             [ KL ]{" "}
           </div>
@@ -22,7 +22,7 @@ export default function HomeHeroBackground() {
             [ .JSON ]{" "}
           </div>
 
-          <div className="absolute top-111 -right-1 w-102 text-center">
+          <div className="absolute top-115 -right-1 w-102 text-center">
             {" "}
             [ RAPID ]{" "}
           </div>
@@ -32,35 +32,35 @@ export default function HomeHeroBackground() {
           </div>
         </div>
 
-        <div className="top-302 h-1 left-0 bg-border-faint w-303 absolute" />
-        <div className="top-403 h-1 left-0 bg-border-faint w-303 absolute" />
-        <div className="top-504 h-1 left-100 bg-border-faint w-203 absolute" />
+        <div className="top-306 h-1 left-0 bg-border-faint w-303 absolute" />
+        <div className="top-407 h-1 left-0 bg-border-faint w-303 absolute" />
+        <div className="top-508 h-1 left-100 bg-border-faint w-203 absolute" />
 
-        <div className="top-302 h-1 right-0 bg-border-faint w-303 absolute" />
-        <div className="top-403 h-1 right-0 bg-border-faint w-303 absolute" />
-        <div className="top-504 h-1 right-100 bg-border-faint w-203 absolute" />
+        <div className="top-306 h-1 right-0 bg-border-faint w-303 absolute" />
+        <div className="top-407 h-1 right-0 bg-border-faint w-303 absolute" />
+        <div className="top-508 h-1 right-100 bg-border-faint w-203 absolute" />
 
         {Array.from({ length: 2 }, (_, i) => (
           <Fragment key={i}>
             <CurvyRect
               bottomLeft={i === 1}
               bottomRight={i === 0}
-              className="w-101  h-[calc(100%-99px)] top-100 absolute"
+              className="w-101  h-[calc(100%-104px)] top-104 absolute"
               style={{ [i === 0 ? "left" : "right"]: -101 }}
             />
 
             <CurvyRect
-              className="w-102 h-203 top-100 absolute"
+              className="w-102 h-203 top-104 absolute"
               style={{ [i === 0 ? "left" : "right"]: -1 }}
               allSides
             />
             <CurvyRect
-              className="size-102 top-302 absolute"
+              className="size-102 top-306 absolute"
               style={{ [i === 0 ? "left" : "right"]: -1 }}
               allSides
             />
             <CurvyRect
-              className="w-102 h-203 top-403 absolute"
+              className="w-102 h-203 top-407 absolute"
               style={{ [i === 0 ? "left" : "right"]: -1 }}
               allSides
             />
@@ -68,22 +68,22 @@ export default function HomeHeroBackground() {
         ))}
       </div>
 
-      <div className="cw-[910px] absolute top-100 border-x border-border-faint h-[calc(100%-99px)]" />
-      <div className="cw-[708px] absolute top-100 border-x border-border-faint h-[calc(100%-99px)]">
+      <div className="cw-[910px] absolute top-104 border-x border-border-faint h-[calc(100%-104px)]" />
+      <div className="cw-[708px] absolute top-104 border-x border-border-faint h-[calc(100%-104px)]">
         <CenterStar className="absolute top-77 -right-24 z-[1]" />
         <CenterStar className="absolute top-77 -left-24 z-[1]" />
       </div>
 
       <CurvyRect
-        className="cw-[708px] absolute top-100 h-[calc(100%-99px)]"
+        className="cw-[708px] absolute top-104 h-[calc(100%-104px)]"
         bottom
       />
 
-      <div className="cw-[506px] absolute top-100 border-x border-border-faint h-102" />
-      <div className="cw-[304px] absolute top-100 border-x border-border-faint h-102" />
-      <div className="cw-[102px] absolute top-100 border-x border-border-faint h-102" />
+      <div className="cw-[506px] absolute top-104 border-x border-border-faint h-102" />
+      <div className="cw-[304px] absolute top-104 border-x border-border-faint h-102" />
+      <div className="cw-[102px] absolute top-104 border-x border-border-faint h-102" />
 
-      <div className="top-201 h-1 bg-border-faint cw-[1112px] absolute" />
+      <div className="top-205 h-1 bg-border-faint cw-[1112px] absolute" />
 
       <div className="cw-[1112px] absolute top-0 h-full">
         <CurvyRect className="w-full absolute top-full h-100 left-0" top />
@@ -101,7 +101,7 @@ export default function HomeHeroBackground() {
             <CurvyRect
               className="size-102 absolute left-0"
               style={{
-                top: 100 + i * 101,
+                top: 104 + i * 101,
               }}
               allSides
             />
@@ -109,7 +109,7 @@ export default function HomeHeroBackground() {
             <CurvyRect
               className="size-102 absolute right-0"
               style={{
-                top: 100 + i * 101,
+                top: 104 + i * 101,
               }}
               allSides
             />
@@ -117,23 +117,23 @@ export default function HomeHeroBackground() {
         ))}
 
         <CurvyRect
-          className="size-102 absolute left-101 top-100"
+          className="size-102 absolute left-101 top-104"
           bottomLeft
           top
         />
         <CurvyRect
-          className="size-102 absolute left-101 top-201"
+          className="size-102 absolute left-101 top-205"
           bottom
           topLeft
         />
 
         <CurvyRect
-          className="size-102 absolute right-101 top-100"
+          className="size-102 absolute right-101 top-104"
           bottomRight
           top
         />
         <CurvyRect
-          className="size-102 absolute right-101 top-201"
+          className="size-102 absolute right-101 top-205"
           bottom
           topRight
         />
@@ -143,7 +143,7 @@ export default function HomeHeroBackground() {
             <CurvyRect
               className="size-102 absolute left-101"
               style={{
-                top: 302 + i * 101,
+                top: 306 + i * 101,
               }}
               allSides
             />
@@ -151,7 +151,7 @@ export default function HomeHeroBackground() {
             <CurvyRect
               className="size-102 absolute right-101"
               style={{
-                top: 302 + i * 101,
+                top: 306 + i * 101,
               }}
               allSides
             />
@@ -159,14 +159,14 @@ export default function HomeHeroBackground() {
         ))}
 
         <CurvyRect
-          className="size-102 absolute top-100 left-202"
+          className="size-102 absolute top-104 left-202"
           bottomRight
           top
         />
 
         {Array.from({ length: 5 }, (_, i) => (
           <CurvyRect
-            className="size-102 absolute top-100"
+            className="size-102 absolute top-104"
             key={i}
             style={{ left: 303 + i * 101 }}
             allSides
@@ -174,7 +174,7 @@ export default function HomeHeroBackground() {
         ))}
 
         <CurvyRect
-          className="size-102 absolute top-100 right-202"
+          className="size-102 absolute top-104 right-202"
           bottomLeft
           top
         />

@@ -10,35 +10,30 @@ export default function HeaderWrapper({
 }: {
   children: React.ReactNode;
 }) {
-  const [shouldShrink, setShouldShrink] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
-  const lastShrinkState = useRef(false);
+  const lastScrollState = useRef(false);
 
   useEffect(() => {
-    const heroContentHeight =
-      document.getElementById("hero-content")?.clientHeight;
-    const triggerTop = heroContentHeight ? heroContentHeight : 100;
-    // Hysteresis buffer to prevent rapid toggling at threshold
+    const triggerTop = 100;
     const hysteresis = 20;
 
     const onScroll = () => {
       const scrollY = window.scrollY;
-      const currentShrink = lastShrinkState.current;
+      const currentState = lastScrollState.current;
       
-      // Only change state if we've crossed the threshold with buffer
-      if (currentShrink && scrollY < triggerTop - hysteresis) {
-        lastShrinkState.current = false;
-        setShouldShrink(false);
-      } else if (!currentShrink && scrollY > triggerTop + hysteresis) {
-        lastShrinkState.current = true;
-        setShouldShrink(true);
+      if (currentState && scrollY < triggerTop - hysteresis) {
+        lastScrollState.current = false;
+        setIsScrolled(false);
+      } else if (!currentState && scrollY > triggerTop + hysteresis) {
+        lastScrollState.current = true;
+        setIsScrolled(true);
       }
     };
 
-    // Initial check without hysteresis
-    const initialShrink = window.scrollY > triggerTop;
-    lastShrinkState.current = initialShrink;
-    setShouldShrink(initialShrink);
+    const initialState = window.scrollY > triggerTop;
+    lastScrollState.current = initialState;
+    setIsScrolled(initialState);
 
     window.addEventListener("scroll", onScroll, { passive: true });
     
@@ -48,13 +43,28 @@ export default function HeaderWrapper({
   }, [pathname]);
 
   return (
-    <div
+    <header
       className={cn(
-        "container lg:px-56 px-16 flex justify-between transition-[padding] duration-[200ms] items-center",
-        shouldShrink ? "py-20" : "py-20 lg:py-34",
+        "sticky top-4 z-[9999] mx-auto flex flex-row items-center justify-between",
+        "rounded-xl backdrop-blur-sm",
+        "border shadow-lg",
+        "transition-all duration-300 ease-out",
+        isScrolled ? "max-w-[900px]" : "max-w-[1314px]"
       )}
+      style={{
+        willChange: "transform, max-width",
+        transform: "translateZ(0)",
+        backfaceVisibility: "hidden",
+        padding: isScrolled ? "12px 24px" : "12px 24px",
+        // Dark mode glassmorphism: #1a1a1d at 80% opacity
+        backgroundColor: "rgba(26, 26, 29, 0.80)",
+        // Border: #3a3a3a at 50% opacity
+        borderColor: "rgba(58, 58, 58, 0.50)",
+        // Subtle dark shadow
+        boxShadow: "0 4px 20px rgba(0, 0, 0, 0.25), 0 1px 3px rgba(0, 0, 0, 0.15)",
+      }}
     >
       {children}
-    </div>
+    </header>
   );
 }

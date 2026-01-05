@@ -27,32 +27,33 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 42 45% 90%;
     --foreground: 240 10% 3.9%;
 
-    --card: 0 0% 100%;
+    --card: 44 50% 93%;
     --card-foreground: 240 10% 3.9%;
 
-    --popover: 0 0% 100%;
+    --popover: 44 50% 93%;
     --popover-foreground: 240 10% 3.9%;
 
     --primary: 240 5.9% 10%;
     --primary-foreground: 0 0% 98%;
 
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
+    --secondary: 42 40% 88%;
+    --secondary-foreground: 40 15% 10%;
 
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
+    --muted: 42 40% 88%;
+    --muted-foreground: 40 15% 46%;
 
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
+    --accent: 42 40% 88%;
+    --accent-foreground: 40 15% 10%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
+    /* Warm brown-gray border - matches rgba(55, 50, 47, 0.12) / #E0DEDB */
+    --border: 36 7% 87%;
+    --input: 36 7% 87%;
     --ring: 240 10% 3.9%;
 
     --radius: 0.5rem;

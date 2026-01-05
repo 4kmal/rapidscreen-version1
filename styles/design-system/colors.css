@@ -48,19 +48,19 @@
   --white-alpha-56: rgba(255, 255, 255, 0.561);
   --white-alpha-72: rgba(255, 255, 255, 0.722);
   
-  /* Border colors */
-  --border-faint: #ededed;
-  --border-muted: #e8e8e8;
-  --border-loud: #e6e6e6;
+  /* Border colors - Warm brown-gray tones */
+  --border-faint: rgba(55, 50, 47, 0.08);
+  --border-muted: rgba(55, 50, 47, 0.12);
+  --border-loud: #E0DEDB;
   
-  /* Illustration colors */
-  --illustrations-faint: #ededed;
-  --illustrations-muted: #e6e6e6;
-  --illustrations-default: #dbdbdb;
+  /* Illustration colors - Warm tones */
+  --illustrations-faint: #EDEAE7;
+  --illustrations-muted: #E0DEDB;
+  --illustrations-default: #D5D2CF;
   
-  /* Background colors */
-  --background-lighter: #fbfbfb;
-  --background-base: #f9f9f9;
+  /* Background colors - Old paper/parchment cream */
+  --background-lighter: #F8F3E4;
+  --background-base: #F2EADB;
   
   /* Foreground colors */
   --foreground: #262626;
@@ -117,19 +117,19 @@
     --white-alpha-56: color(display-p3 1.000000 1.000000 1.000000 / 0.560784);
     --white-alpha-72: color(display-p3 1.000000 1.000000 1.000000 / 0.721569);
     
-    /* Border colors */
-    --border-faint: color(display-p3 0.929412 0.929412 0.929412 / 1.000000);
-    --border-muted: color(display-p3 0.909804 0.909804 0.909804 / 1.000000);
-    --border-loud: color(display-p3 0.901961 0.901961 0.901961 / 1.000000);
+    /* Border colors - Warm brown-gray tones */
+    --border-faint: color(display-p3 0.215686 0.196078 0.184314 / 0.08);
+    --border-muted: color(display-p3 0.215686 0.196078 0.184314 / 0.12);
+    --border-loud: color(display-p3 0.878431 0.870588 0.858824 / 1.000000);
     
-    /* Illustration colors */
-    --illustrations-faint: color(display-p3 0.929412 0.929412 0.929412 / 1.000000);
-    --illustrations-muted: color(display-p3 0.901961 0.901961 0.901961 / 1.000000);
-    --illustrations-default: color(display-p3 0.858824 0.858824 0.858824 / 1.000000);
+    /* Illustration colors - Warm tones */
+    --illustrations-faint: color(display-p3 0.929412 0.917647 0.905882 / 1.000000);
+    --illustrations-muted: color(display-p3 0.878431 0.870588 0.858824 / 1.000000);
+    --illustrations-default: color(display-p3 0.835294 0.823529 0.811765 / 1.000000);
     
-    /* Background colors */
-    --background-lighter: color(display-p3 0.984314 0.984314 0.984314 / 1.000000);
-    --background-base: color(display-p3 0.976471 0.976471 0.976471 / 1.000000);
+    /* Background colors - Old paper/parchment cream */
+    --background-lighter: color(display-p3 0.972549 0.952941 0.894118 / 1.000000);
+    --background-base: color(display-p3 0.949020 0.917647 0.858824 / 1.000000);
   }
 }
 

@@ -20,7 +20,7 @@ export const SalesChart: React.FC = () => {
   return (
     <div className="w-full h-full">
       <h3 className="text-xl font-bold text-slate-800 mb-1">$15.8M <span className="text-sm font-normal text-slate-500">Sales</span></h3>
-      <div className="flex gap-4 text-xs text-slate-400 mb-6 border-b border-slate-100 pb-2">
+      <div className="flex gap-4 text-xs text-slate-400 mb-6 border-b border-border-muted pb-2">
         <span>Content</span>
         <span>Territory</span>
         <span className="text-blue-500 font-medium">Device</span>

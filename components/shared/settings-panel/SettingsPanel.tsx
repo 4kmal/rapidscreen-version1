@@ -8,6 +8,7 @@ import { useTitleStyleContext, TitleStyle } from "../title-style-context/TitleSt
 import { useLEDContext, LEDFont, LEDTransform } from "../led-context/LEDContext";
 import { useAvatarContext, ANIMATIONS, ANIMATION_LABELS } from "../avatar-context/AvatarContext";
 import { useFooterEffectContext, EFFECTS, EFFECT_LABELS } from "../footer-effect-context/FooterEffectContext";
+import { useSound } from "../sound-context/SoundContext";
 import { cn } from "@/utils/cn";
 
 const fontOptions: { id: FontChoice; label: string }[] = [
@@ -339,6 +340,7 @@ export default function SettingsPanel() {
   }
   
   const { theme, setTheme, resolvedTheme } = useTheme();
+  const { playClick, playToggleOn, playToggleOff, playPop, playWhoosh, isMuted: isSoundMuted, setIsMuted: setSoundMuted } = useSound();
 
   // Initialize audio element
   useEffect(() => {
@@ -431,8 +433,57 @@ export default function SettingsPanel() {
   }, [isOpen]);
 
   const handleFontChange = (fontId: FontChoice) => {
+    playClick();
     setSelectedFont(fontId);
     dismissOnboarding();
+  };
+
+  // Default values for reset
+  const DEFAULT_LED_SETTINGS = {
+    hue: 111,
+    duration: 12.5,
+    bgLight: 0.15,
+    scale: 1,
+    text: "Innovate, Execute, Iterate",
+    font: "space-grotesk" as const,
+    textTransform: "capitalize" as const,
+    fontSize: 40,
+    textColor: "#FF6B35",
+    isStatic: false,
+  };
+
+  const handleResetToDefaults = () => {
+    playWhoosh();
+    // Reset font
+    setSelectedFont("departure-mono");
+    
+    // Reset title style
+    setSelectedStyle("default");
+    
+    // Reset LED settings
+    setLedSettings(DEFAULT_LED_SETTINGS);
+    
+    // Reset avatar
+    if (avatarContext) {
+      avatarContext.setCurrentIndex(0);
+    }
+    
+    // Reset footer effect
+    if (footerEffectContext) {
+      footerEffectContext.setCurrentEffect("hero-flame");
+    }
+    
+    // Reset theme
+    setTheme("system");
+    
+    // Reset volume
+    setVolume(10);
+    
+    // Stop music if playing
+    if (audioRef.current && isPlaying) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    }
   };
 
   const currentTheme = theme === "system" ? "system" : theme;
@@ -448,10 +499,13 @@ export default function SettingsPanel() {
     <div className="relative" ref={panelRef}>
       {/* Settings Button */}
       <motion.button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => {
+          playPop();
+          setIsOpen(!isOpen);
+        }}
         className={cn(
-          "relative w-36 h-36 flex items-center justify-center rounded-8 transition-colors duration-200",
-          isOpen ? "bg-black-alpha-12" : "bg-black-alpha-4 hover:bg-black-alpha-8"
+          "rounded-md font-bold relative cursor-pointer hover:-translate-y-0.5 transition duration-200 inline-flex items-center justify-center bg-gradient-to-b from-[#e78a53] to-[#e78a53]/80 text-[#1a1a1d] shadow-[0px_2px_0px_0px_rgba(255,255,255,0.3)_inset] w-36 h-36",
+          isOpen && "translate-y-0"
         )}
         whileTap={{ scale: 0.92 }}
         aria-label="Open settings"
@@ -467,7 +521,7 @@ export default function SettingsPanel() {
           strokeLinecap="round"
           strokeLinejoin="round"
           className={cn(
-            "text-accent-black transition-transform duration-300",
+            "text-[#1a1a1d] transition-transform duration-300",
             isOpen && "rotate-90"
           )}
         >
@@ -488,6 +542,64 @@ export default function SettingsPanel() {
           >
             <div className="bg-background-base border border-border-faint rounded-12 shadow-2xl overflow-hidden max-h-[70vh] flex flex-col">
               <div className="overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-black-alpha-20 scrollbar-track-transparent">
+              {/* Theme Section */}
+              <div className="border-b border-border-faint">
+                <div className="px-16 py-12">
+                  <div className="flex items-center gap-8 text-[11px] font-mono uppercase tracking-wider text-black-alpha-40 mb-8">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="12" cy="12" r="5" />
+                      <line x1="12" y1="1" x2="12" y2="3" />
+                      <line x1="12" y1="21" x2="12" y2="23" />
+                      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                      <line x1="1" y1="12" x2="3" y2="12" />
+                      <line x1="21" y1="12" x2="23" y2="12" />
+                      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                    </svg>
+                    <span>Theme</span>
+                  </div>
+                  
+                  <div className="relative flex bg-black-alpha-4 rounded-8 p-1">
+                    {/* Animated background indicator */}
+                    <motion.div
+                      className="absolute top-1 bottom-1 rounded-6 bg-background-base shadow-sm"
+                      initial={false}
+                      animate={{
+                        left: currentTheme === "light" ? "4px" : currentTheme === "dark" ? "calc(33.333% + 1px)" : "calc(66.666% - 2px)",
+                        width: "calc(33.333% - 4px)",
+                      }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 400,
+                        damping: 30,
+                      }}
+                    />
+                    {[
+                      { id: "light", label: "Light" },
+                      { id: "dark", label: "Dark" },
+                      { id: "system", label: "Auto" },
+                    ].map((option) => (
+                      <button
+                        key={option.id}
+                        onClick={() => {
+                          playClick();
+                          setTheme(option.id);
+                        }}
+                        className={cn(
+                          "relative z-10 flex-1 flex items-center justify-center px-8 py-6 rounded-6 text-[12px] transition-colors duration-150",
+                          currentTheme === option.id
+                            ? "text-accent-black"
+                            : "text-black-alpha-48 hover:text-accent-black"
+                        )}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
               {/* Font Section */}
               <div className="border-b border-border-faint">
                 <div className="px-16 py-12">
@@ -858,45 +970,46 @@ export default function SettingsPanel() {
                 </div>
               </div>
 
-              {/* Theme Section */}
+              {/* UI Sounds Section */}
               <div className="border-b border-border-faint">
                 <div className="px-16 py-12">
-                  <div className="flex items-center gap-8 text-[11px] font-mono uppercase tracking-wider text-black-alpha-40 mb-8">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <circle cx="12" cy="12" r="5" />
-                      <line x1="12" y1="1" x2="12" y2="3" />
-                      <line x1="12" y1="21" x2="12" y2="23" />
-                      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-                      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-                      <line x1="1" y1="12" x2="3" y2="12" />
-                      <line x1="21" y1="12" x2="23" y2="12" />
-                      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-                      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-                    </svg>
-                    <span>Theme</span>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-8 text-[11px] font-mono uppercase tracking-wider text-black-alpha-40">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                      </svg>
+                      <span>UI Sounds</span>
+                    </div>
+                    <button
+                      onClick={() => {
+                        if (isSoundMuted) {
+                          playToggleOn();
+                        }
+                        setSoundMuted(!isSoundMuted);
+                      }}
+                      className={cn(
+                        "relative w-11 h-6 rounded-full transition-colors duration-200",
+                        isSoundMuted ? "bg-black-alpha-12" : "bg-heat-100"
+                      )}
+                    >
+                      <motion.div
+                        className="absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm"
+                        initial={false}
+                        animate={{
+                          left: isSoundMuted ? "4px" : "calc(100% - 20px)",
+                        }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 500,
+                          damping: 30,
+                        }}
+                      />
+                    </button>
                   </div>
-                  
-                  <div className="flex bg-black-alpha-4 rounded-8 p-1">
-                    {[
-                      { id: "light", label: "Light", icon: "" },
-                      { id: "dark", label: "Dark", icon: "" },
-                      { id: "system", label: "Auto", icon: "" },
-                    ].map((option) => (
-                      <button
-                        key={option.id}
-                        onClick={() => setTheme(option.id)}
-                        className={cn(
-                          "flex-1 flex items-center justify-center gap-1.5 px-8 py-6 rounded-6 text-[12px] transition-all duration-150",
-                          currentTheme === option.id
-                            ? "bg-background-base text-accent-black shadow-sm"
-                            : "text-black-alpha-48 hover:text-accent-black"
-                        )}
-                      >
-                        <span className="text-[10px]">{option.icon}</span>
-                        <span>{option.label}</span>
-                      </button>
-                    ))}
-                  </div>
+                  <p className="text-[10px] text-black-alpha-40 mt-2">
+                    {isSoundMuted ? "Sound effects are muted" : "Click & toggle sounds enabled"}
+                  </p>
                 </div>
               </div>
 
@@ -993,14 +1106,26 @@ export default function SettingsPanel() {
               </div>
               </div>
 
-              {/* Close Button */}
+              {/* Reset & Close Buttons */}
               <div className="border-t border-border-faint flex-shrink-0">
-                <button
-                  onClick={() => setIsOpen(false)}
-                  className="w-full py-12 text-[13px] text-black-alpha-48 hover:text-accent-black hover:bg-black-alpha-4 transition-all duration-150"
-                >
-                  Close Settings
-                </button>
+                <div className="flex">
+                  <button
+                    onClick={handleResetToDefaults}
+                    className="flex-1 flex items-center justify-center gap-6 py-12 text-[13px] text-heat-100 hover:text-white hover:bg-heat-100 border-r border-border-faint transition-all duration-150"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                      <path d="M3 3v5h5" />
+                    </svg>
+                    Reset
+                  </button>
+                  <button
+                    onClick={() => setIsOpen(false)}
+                    className="flex-1 py-12 text-[13px] text-black-alpha-48 hover:text-accent-black hover:bg-black-alpha-4 transition-all duration-150"
+                  >
+                    Close
+                  </button>
+                </div>
               </div>
             </div>
           </motion.div>

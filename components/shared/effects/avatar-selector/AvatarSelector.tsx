@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useRef, useEffect, useCallback, useState } from 'react';
+import React, { useRef, useEffect, useCallback, useState, memo } from 'react';
+import { useTheme } from "next-themes";
 import { useAvatarContext, AnimationType, ANIMATIONS } from '../../avatar-context/AvatarContext';
 
 interface AvatarSelectorProps {
@@ -14,10 +15,6 @@ function easeInOutCubic(t: number): number {
 }
 
 const GLOBAL_SPEED = 0.5;
-const MONOCHROME_FILL = (opacity: number) =>
-  `rgba(255, 255, 255, ${Math.max(0, Math.min(1, opacity))})`;
-const MONOCHROME_STROKE = (opacity: number) =>
-  `rgba(255, 255, 255, ${Math.max(0, Math.min(1, opacity))})`;
 
 // Eye Component
 function EyeAnimation({ size }: { size: number }) {
@@ -171,10 +168,40 @@ function EyeAnimation({ size }: { size: number }) {
   );
 }
 
-// Canvas Animation Component
-function CanvasAnimation({ type, size }: { type: AnimationType; size: number }) {
+// Canvas Animation Component - Memoized to prevent resets on parent re-renders
+const CanvasAnimation = memo(function CanvasAnimation({ type, size }: { type: AnimationType; size: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
+  const { resolvedTheme } = useTheme();
+  
+  // Theme-aware fill/stroke colors - memoized to prevent useEffect re-runs
+  const isLightMode = resolvedTheme === 'light';
+  const getMonochromeFill = useCallback((opacity: number) =>
+    isLightMode 
+      ? `rgba(0, 0, 0, ${Math.max(0, Math.min(1, opacity))})`
+      : `rgba(255, 255, 255, ${Math.max(0, Math.min(1, opacity))})`,
+    [isLightMode]
+  );
+  const getMonochromeStroke = useCallback((opacity: number) =>
+    isLightMode
+      ? `rgba(0, 0, 0, ${Math.max(0, Math.min(1, opacity))})`
+      : `rgba(255, 255, 255, ${Math.max(0, Math.min(1, opacity))})`,
+    [isLightMode]
+  );
+
+  // Persist animation state across re-renders using refs
+  const timeRef = useRef(0);
+  const lastTimeRef = useRef(0);
+  const dotsRef = useRef<{ x: number; y: number; z: number; angle?: number; r?: number; lastSeen?: number }[]>([]);
+  const ringDataRef = useRef<{ r: number; angle: number; lastSeen: number }[]>([]);
+  const helixDotsRef = useRef<{ angle: number; y: number }[]>([]);
+  const dotRingsRef = useRef([
+    { radius: 20, count: 12 },
+    { radius: 45, count: 24 },
+    { radius: 70, count: 36 },
+  ]);
+  const initializedRef = useRef(false);
+  const currentTypeRef = useRef<AnimationType | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -183,120 +210,137 @@ function CanvasAnimation({ type, size }: { type: AnimationType; size: number }) 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let time = 0;
-    let lastTime = 0;
-
     const centerX = size / 2;
     const centerY = size / 2;
 
-    // Animation data structures
-    let dots: { x: number; y: number; z: number; angle?: number; r?: number; lastSeen?: number }[] = [];
-    let ringData: { r: number; angle: number; lastSeen: number }[] = [];
-    let helixDots: { angle: number; y: number }[] = [];
-    let dotRings = [
-      { radius: 20, count: 12 },
-      { radius: 45, count: 24 },
-      { radius: 70, count: 36 },
-    ];
+    // Only reinitialize if animation type changed
+    if (currentTypeRef.current !== type) {
+      initializedRef.current = false;
+      currentTypeRef.current = type;
+      // Reset time only on type change
+      timeRef.current = 0;
+      lastTimeRef.current = 0;
+    }
 
-    // Initialize based on animation type
-    if (type === 'sphere-scan') {
-      const numDots = 250;
-      const radius = size * 0.4;
-      for (let i = 0; i < numDots; i++) {
-        const theta = Math.acos(1 - 2 * (i / numDots));
-        const phi = Math.sqrt(numDots * Math.PI) * theta;
-        dots.push({
-          x: radius * Math.sin(theta) * Math.cos(phi),
-          y: radius * Math.sin(theta) * Math.sin(phi),
-          z: radius * Math.cos(theta),
+    // Use refs for animation data
+    const dots = dotsRef.current;
+    const ringData = ringDataRef.current;
+    const helixDots = helixDotsRef.current;
+    const dotRings = dotRingsRef.current;
+
+    // Initialize based on animation type - only if not already initialized for this type
+    if (!initializedRef.current) {
+      // Clear previous data
+      dotsRef.current = [];
+      ringDataRef.current = [];
+      helixDotsRef.current = [];
+
+      if (type === 'sphere-scan') {
+        const numDots = 250;
+        const radius = size * 0.4;
+        for (let i = 0; i < numDots; i++) {
+          const theta = Math.acos(1 - 2 * (i / numDots));
+          const phi = Math.sqrt(numDots * Math.PI) * theta;
+          dotsRef.current.push({
+            x: radius * Math.sin(theta) * Math.cos(phi),
+            y: radius * Math.sin(theta) * Math.sin(phi),
+            z: radius * Math.cos(theta),
+          });
+        }
+      } else if (type === 'crystalline-refraction') {
+        const gridSize = 15;
+        const spacing = size / (gridSize - 1);
+        for (let r = 0; r < gridSize; r++) {
+          for (let c = 0; c < gridSize; c++) {
+            dotsRef.current.push({ x: c * spacing, y: r * spacing, z: 0 });
+          }
+        }
+      } else if (type === 'sonar-sweep') {
+        const fadeTime = 2500;
+        for (let r = 20; r <= 80; r += 15) {
+          for (let i = 0; i < r / 2; i++) {
+            ringDataRef.current.push({
+              r,
+              angle: (i / (r / 2)) * Math.PI * 2,
+              lastSeen: -fadeTime,
+            });
+          }
+        }
+      } else if (type === 'helix-scanner') {
+        const numDots = 100;
+        const height = 120;
+        for (let i = 0; i < numDots; i++) {
+          helixDotsRef.current.push({ angle: i * 0.3, y: (i / numDots) * height - height / 2 });
+        }
+      } else if (type === 'cylindrical-analysis') {
+        // Data is computed inline
+      } else if (type === 'voxel-matrix-morph') {
+        const gridSize = 5;
+        const spacing = 20;
+        for (let x = 0; x < gridSize; x++) {
+          for (let y = 0; y < gridSize; y++) {
+            for (let z = 0; z < gridSize; z++) {
+              dotsRef.current.push({
+                x: (x - (gridSize - 1) / 2) * spacing,
+                y: (y - (gridSize - 1) / 2) * spacing,
+                z: (z - (gridSize - 1) / 2) * spacing,
+              });
+            }
+          }
+        }
+      } else if (type === 'phased-array-emitter') {
+        const ringRadii = [20, 40, 60, 80];
+        const pointsPerRing = [12, 18, 24, 30];
+        ringRadii.forEach((radius, i) => {
+          for (let j = 0; j < pointsPerRing[i]; j++) {
+            const angle = (j / pointsPerRing[i]) * Math.PI * 2;
+            dotsRef.current.push({
+              x: Math.cos(angle) * radius,
+              y: Math.sin(angle) * radius,
+              z: 0,
+            });
+          }
         });
-      }
-    } else if (type === 'crystalline-refraction') {
-      const gridSize = 15;
-      const spacing = size / (gridSize - 1);
-      for (let r = 0; r < gridSize; r++) {
-        for (let c = 0; c < gridSize; c++) {
-          dots.push({ x: c * spacing, y: r * spacing, z: 0 });
-        }
-      }
-    } else if (type === 'sonar-sweep') {
-      const fadeTime = 2500;
-      for (let r = 20; r <= 80; r += 15) {
-        for (let i = 0; i < r / 2; i++) {
-          ringData.push({
-            r,
-            angle: (i / (r / 2)) * Math.PI * 2,
-            lastSeen: -fadeTime,
-          });
-        }
-      }
-    } else if (type === 'helix-scanner') {
-      const numDots = 100;
-      const height = 120;
-      for (let i = 0; i < numDots; i++) {
-        helixDots.push({ angle: i * 0.3, y: (i / numDots) * height - height / 2 });
-      }
-    } else if (type === 'cylindrical-analysis') {
-      // Data is computed inline
-    } else if (type === 'voxel-matrix-morph') {
-      const gridSize = 5;
-      const spacing = 20;
-      for (let x = 0; x < gridSize; x++) {
-        for (let y = 0; y < gridSize; y++) {
-          for (let z = 0; z < gridSize; z++) {
-            dots.push({
-              x: (x - (gridSize - 1) / 2) * spacing,
-              y: (y - (gridSize - 1) / 2) * spacing,
-              z: (z - (gridSize - 1) / 2) * spacing,
-            });
+      } else if (type === 'crystalline-cube-refraction') {
+        const gridSize = 7;
+        const spacing = 15;
+        const cubeHalfSize = ((gridSize - 1) * spacing) / 2;
+        for (let x = 0; x < gridSize; x++) {
+          for (let y = 0; y < gridSize; y++) {
+            for (let z = 0; z < gridSize; z++) {
+              dotsRef.current.push({
+                x: x * spacing - cubeHalfSize,
+                y: y * spacing - cubeHalfSize,
+                z: z * spacing - cubeHalfSize,
+              });
+            }
           }
         }
       }
-    } else if (type === 'phased-array-emitter') {
-      const ringRadii = [20, 40, 60, 80];
-      const pointsPerRing = [12, 18, 24, 30];
-      ringRadii.forEach((radius, i) => {
-        for (let j = 0; j < pointsPerRing[i]; j++) {
-          const angle = (j / pointsPerRing[i]) * Math.PI * 2;
-          dots.push({
-            x: Math.cos(angle) * radius,
-            y: Math.sin(angle) * radius,
-            z: 0,
-          });
-        }
-      });
-    } else if (type === 'crystalline-cube-refraction') {
-      const gridSize = 7;
-      const spacing = 15;
-      const cubeHalfSize = ((gridSize - 1) * spacing) / 2;
-      for (let x = 0; x < gridSize; x++) {
-        for (let y = 0; y < gridSize; y++) {
-          for (let z = 0; z < gridSize; z++) {
-            dots.push({
-              x: x * spacing - cubeHalfSize,
-              y: y * spacing - cubeHalfSize,
-              z: z * spacing - cubeHalfSize,
-            });
-          }
-        }
-      }
+      
+      initializedRef.current = true;
     }
 
     function animate(timestamp: number) {
       if (!ctx) return;
-      if (!lastTime) lastTime = timestamp;
-      const deltaTime = timestamp - lastTime;
-      lastTime = timestamp;
+      if (!lastTimeRef.current) lastTimeRef.current = timestamp;
+      const deltaTime = timestamp - lastTimeRef.current;
+      lastTimeRef.current = timestamp;
 
       ctx.clearRect(0, 0, size, size);
 
+      // Use refs for animation data
+      const dots = dotsRef.current;
+      const ringData = ringDataRef.current;
+      const helixDots = helixDotsRef.current;
+      const dotRings = dotRingsRef.current;
+
       if (type === 'sphere-scan') {
-        time += deltaTime * 0.0005 * GLOBAL_SPEED;
+        timeRef.current += deltaTime * 0.0005 * GLOBAL_SPEED;
         const radius = size * 0.4;
-        const rotX = Math.sin(time * 0.3) * 0.5;
-        const rotY = time * 0.5;
-        const easedTime = easeInOutCubic((Math.sin(time * 2.5) + 1) / 2);
+        const rotX = Math.sin(timeRef.current * 0.3) * 0.5;
+        const rotY = timeRef.current * 0.5;
+        const easedTime = easeInOutCubic((Math.sin(timeRef.current * 2.5) + 1) / 2);
         const scanLine = (easedTime * 2 - 1) * radius;
         const scanWidth = 25;
 
@@ -321,12 +365,12 @@ function CanvasAnimation({ type, size }: { type: AnimationType; size: number }) 
           const opacity = Math.max(0, scale * 0.6 + scanInfluence * 0.4);
           ctx.beginPath();
           ctx.arc(pX, pY, dotSize, 0, Math.PI * 2);
-          ctx.fillStyle = MONOCHROME_FILL(opacity);
+          ctx.fillStyle = getMonochromeFill(opacity);
           ctx.fill();
         });
       } else if (type === 'crystalline-refraction') {
-        time += deltaTime * 0.16 * GLOBAL_SPEED;
-        const waveRadius = time % (size * 1.2);
+        timeRef.current += deltaTime * 0.16 * GLOBAL_SPEED;
+        const waveRadius = timeRef.current % (size * 1.2);
         const waveWidth = 60;
 
         dots.forEach((dot) => {
@@ -344,26 +388,26 @@ function CanvasAnimation({ type, size }: { type: AnimationType; size: number }) 
           const dotSize = 1.2 + (Math.abs(displacement) / 10) * 2;
           ctx.beginPath();
           ctx.arc(dot.x + dx, dot.y + dy, dotSize, 0, Math.PI * 2);
-          ctx.fillStyle = MONOCHROME_FILL(opacity);
+          ctx.fillStyle = getMonochromeFill(opacity);
           ctx.fill();
         });
       } else if (type === 'sonar-sweep') {
-        time = timestamp;
+        timeRef.current = timestamp;
         const fadeTime = 2500;
-        const scanAngle = (time * 0.001 * (Math.PI / 2) * GLOBAL_SPEED) % (Math.PI * 2);
+        const scanAngle = (timeRef.current * 0.001 * (Math.PI / 2) * GLOBAL_SPEED) % (Math.PI * 2);
         
         ctx.beginPath();
         ctx.moveTo(centerX, centerY);
         ctx.lineTo(centerX + 85 * Math.cos(scanAngle), centerY + 85 * Math.sin(scanAngle));
-        ctx.strokeStyle = MONOCHROME_STROKE(0.5);
+        ctx.strokeStyle = getMonochromeStroke(0.5);
         ctx.lineWidth = 1;
         ctx.stroke();
 
         ringData.forEach((dot) => {
           let angleDiff = Math.abs(dot.angle - scanAngle);
           if (angleDiff > Math.PI) angleDiff = Math.PI * 2 - angleDiff;
-          if (angleDiff < 0.05) dot.lastSeen = time;
-          const timeSinceSeen = time - dot.lastSeen;
+          if (angleDiff < 0.05) dot.lastSeen = timeRef.current;
+          const timeSinceSeen = timeRef.current - dot.lastSeen;
           if (timeSinceSeen < fadeTime) {
             const t = timeSinceSeen / fadeTime;
             const opacity = 1 - easeInOutCubic(t);
@@ -372,22 +416,22 @@ function CanvasAnimation({ type, size }: { type: AnimationType; size: number }) 
             const y = centerY + dot.r * Math.sin(dot.angle);
             ctx.beginPath();
             ctx.arc(x, y, dotSize, 0, Math.PI * 2);
-            ctx.fillStyle = MONOCHROME_FILL(opacity);
+            ctx.fillStyle = getMonochromeFill(opacity);
             ctx.fill();
           }
         });
       } else if (type === 'helix-scanner') {
-        time += deltaTime * 0.001 * GLOBAL_SPEED;
+        timeRef.current += deltaTime * 0.001 * GLOBAL_SPEED;
         const radius = 35;
         const height = 120;
         const loopDuration = 8;
-        const seamlessProgress = Math.sin((time / loopDuration) * Math.PI * 2);
+        const seamlessProgress = Math.sin((timeRef.current / loopDuration) * Math.PI * 2);
         const scanY = seamlessProgress * (height / 2);
         const scanWidth = 25;
         const trailLength = height * 0.3;
 
         helixDots.forEach((dot) => {
-          const rotation = time;
+          const rotation = timeRef.current;
           const x = radius * Math.cos(dot.angle + rotation);
           const z = radius * Math.sin(dot.angle + rotation);
           const pX = centerX + x;
@@ -399,7 +443,7 @@ function CanvasAnimation({ type, size }: { type: AnimationType; size: number }) 
             : 0;
           let trailInfluence = 0;
           const distBehindScan = dot.y - scanY;
-          const isMovingUp = Math.cos((time / loopDuration) * Math.PI * 2) > 0;
+          const isMovingUp = Math.cos((timeRef.current / loopDuration) * Math.PI * 2) > 0;
           if (isMovingUp && distBehindScan < 0 && Math.abs(distBehindScan) < trailLength) {
             trailInfluence = Math.pow(1 - Math.abs(distBehindScan) / trailLength, 2) * 0.4;
           } else if (!isMovingUp && distBehindScan > 0 && Math.abs(distBehindScan) < trailLength) {
@@ -410,32 +454,32 @@ function CanvasAnimation({ type, size }: { type: AnimationType; size: number }) 
           const opacity = Math.max(0, scale * 0.4 + totalInfluence * 0.6);
           ctx.beginPath();
           ctx.arc(pX, pY, dotSize, 0, Math.PI * 2);
-          ctx.fillStyle = MONOCHROME_FILL(opacity);
+          ctx.fillStyle = getMonochromeFill(opacity);
           ctx.fill();
         });
       } else if (type === 'interconnecting-waves') {
-        time += deltaTime * 0.001 * GLOBAL_SPEED;
+        timeRef.current += deltaTime * 0.001 * GLOBAL_SPEED;
 
         dotRings.forEach((ring, ringIndex) => {
           if (ringIndex >= dotRings.length - 1) return;
           const nextRing = dotRings[ringIndex + 1];
           for (let i = 0; i < ring.count; i++) {
             const angle = (i / ring.count) * Math.PI * 2;
-            const radiusPulse1 = Math.sin(time * 2 - ringIndex * 0.4) * 3;
+            const radiusPulse1 = Math.sin(timeRef.current * 2 - ringIndex * 0.4) * 3;
             const x1 = centerX + Math.cos(angle) * (ring.radius + radiusPulse1);
             const y1 = centerY + Math.sin(angle) * (ring.radius + radiusPulse1);
             const nextRingRatio = nextRing.count / ring.count;
             for (let j = 0; j < nextRingRatio; j++) {
               const nextAngle = ((i * nextRingRatio + j) / nextRing.count) * Math.PI * 2;
-              const radiusPulse2 = Math.sin(time * 2 - (ringIndex + 1) * 0.4) * 3;
+              const radiusPulse2 = Math.sin(timeRef.current * 2 - (ringIndex + 1) * 0.4) * 3;
               const x2 = centerX + Math.cos(nextAngle) * (nextRing.radius + radiusPulse2);
               const y2 = centerY + Math.sin(nextAngle) * (nextRing.radius + radiusPulse2);
-              const lineOpacity = 0.1 + ((Math.sin(time * 3 - ringIndex * 0.5 + i * 0.3) + 1) / 2) * 0.4;
+              const lineOpacity = 0.1 + ((Math.sin(timeRef.current * 3 - ringIndex * 0.5 + i * 0.3) + 1) / 2) * 0.4;
               ctx.beginPath();
               ctx.moveTo(x1, y1);
               ctx.lineTo(x2, y2);
               ctx.lineWidth = 0.75;
-              ctx.strokeStyle = MONOCHROME_STROKE(lineOpacity);
+              ctx.strokeStyle = getMonochromeStroke(lineOpacity);
               ctx.stroke();
             }
           }
@@ -444,29 +488,29 @@ function CanvasAnimation({ type, size }: { type: AnimationType; size: number }) 
         dotRings.forEach((ring, ringIndex) => {
           for (let i = 0; i < ring.count; i++) {
             const angle = (i / ring.count) * Math.PI * 2;
-            const radiusPulse = Math.sin(time * 2 - ringIndex * 0.4) * 3;
+            const radiusPulse = Math.sin(timeRef.current * 2 - ringIndex * 0.4) * 3;
             const x = centerX + Math.cos(angle) * (ring.radius + radiusPulse);
             const y = centerY + Math.sin(angle) * (ring.radius + radiusPulse);
-            const dotOpacity = 0.4 + Math.sin(time * 2 - ringIndex * 0.4 + i * 0.2) * 0.6;
+            const dotOpacity = 0.4 + Math.sin(timeRef.current * 2 - ringIndex * 0.4 + i * 0.2) * 0.6;
             ctx.beginPath();
             ctx.arc(x, y, 1.5, 0, Math.PI * 2);
-            ctx.fillStyle = MONOCHROME_FILL(dotOpacity);
+            ctx.fillStyle = getMonochromeFill(dotOpacity);
             ctx.fill();
           }
         });
       } else if (type === 'cylindrical-analysis') {
-        time += deltaTime * 0.001 * GLOBAL_SPEED;
+        timeRef.current += deltaTime * 0.001 * GLOBAL_SPEED;
         const radius = 60;
         const height = 100;
         const numLayers = 15;
         const dotsPerLayer = 25;
-        const easedTime = easeInOutCubic((Math.sin(time * 2) + 1) / 2);
+        const easedTime = easeInOutCubic((Math.sin(timeRef.current * 2) + 1) / 2);
         const scanY = centerY + (easedTime * 2 - 1) * (height / 2);
         const scanWidth = 15;
 
         for (let i = 0; i < numLayers; i++) {
           const layerY = centerY + (i / (numLayers - 1) - 0.5) * height;
-          const rot = time * (0.2 + (i % 2) * 0.1);
+          const rot = timeRef.current * (0.2 + (i % 2) * 0.1);
           for (let j = 0; j < dotsPerLayer; j++) {
             const angle = (j / dotsPerLayer) * Math.PI * 2 + rot;
             const x = Math.cos(angle) * radius;
@@ -482,18 +526,18 @@ function CanvasAnimation({ type, size }: { type: AnimationType; size: number }) 
             const opacity = Math.max(0, scale * 0.5 + scanInfluence * 0.5);
             ctx.beginPath();
             ctx.arc(pX, pY, dotSize, 0, Math.PI * 2);
-            ctx.fillStyle = MONOCHROME_FILL(opacity);
+            ctx.fillStyle = getMonochromeFill(opacity);
             ctx.fill();
           }
         }
       } else if (type === 'voxel-matrix-morph') {
-        time += deltaTime * 0.0005 * GLOBAL_SPEED;
-        const rotX = time * 0.4;
-        const rotY = time * 0.6;
+        timeRef.current += deltaTime * 0.0005 * GLOBAL_SPEED;
+        const rotX = timeRef.current * 0.4;
+        const rotY = timeRef.current * 0.6;
         const gridSize = 5;
         const spacing = 20;
         const totalSize = (gridSize - 1) * spacing;
-        const easedTime = easeInOutCubic((Math.sin(time * 2) + 1) / 2);
+        const easedTime = easeInOutCubic((Math.sin(timeRef.current * 2) + 1) / 2);
         const scanLine = (easedTime * 2 - 1) * (totalSize / 2 + 10);
         const scanWidth = 30;
 
@@ -521,16 +565,16 @@ function CanvasAnimation({ type, size }: { type: AnimationType; size: number }) 
           const opacity = Math.max(0.1, scale * 0.7 + scanInfluence * 0.3);
           ctx.beginPath();
           ctx.arc(pX, pY, dotSize, 0, Math.PI * 2);
-          ctx.fillStyle = MONOCHROME_FILL(opacity);
+          ctx.fillStyle = getMonochromeFill(opacity);
           ctx.fill();
         });
       } else if (type === 'phased-array-emitter') {
-        time += deltaTime * 0.001 * GLOBAL_SPEED;
+        timeRef.current += deltaTime * 0.001 * GLOBAL_SPEED;
         const fov = 300;
         const rotX = 1.0;
-        const rotY = time * 0.2;
+        const rotY = timeRef.current * 0.2;
         const maxRadius = 80;
-        const waveRadius = (time * 120) % (maxRadius * 1.8);
+        const waveRadius = (timeRef.current * 120) % (maxRadius * 1.8);
         const waveWidth = 50;
         const waveHeight = 18;
         const pointsToDraw: { x: number; y: number; z: number; size: number; opacity: number }[] = [];
@@ -571,18 +615,18 @@ function CanvasAnimation({ type, size }: { type: AnimationType; size: number }) 
             if (p.size < 0.1) return;
             ctx.beginPath();
             ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-            ctx.fillStyle = MONOCHROME_FILL(p.opacity);
+            ctx.fillStyle = getMonochromeFill(p.opacity);
             ctx.fill();
           });
       } else if (type === 'crystalline-cube-refraction') {
-        time += deltaTime * 0.0003 * GLOBAL_SPEED;
+        timeRef.current += deltaTime * 0.0003 * GLOBAL_SPEED;
         const fov = 250;
         const gridSize = 7;
         const spacing = 15;
         const cubeHalfSize = ((gridSize - 1) * spacing) / 2;
         const maxDist = Math.hypot(cubeHalfSize, cubeHalfSize, cubeHalfSize);
-        const rotX = time * 2;
-        const rotY = time * 3;
+        const rotX = timeRef.current * 2;
+        const rotY = timeRef.current * 3;
         const waveRadius = (timestamp * 0.04 * GLOBAL_SPEED) % (maxDist * 1.5);
         const waveWidth = 40;
         const displacementMagnitude = 10;
@@ -629,7 +673,7 @@ function CanvasAnimation({ type, size }: { type: AnimationType; size: number }) 
           .forEach((p) => {
             ctx.beginPath();
             ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-            ctx.fillStyle = MONOCHROME_FILL(p.opacity);
+            ctx.fillStyle = getMonochromeFill(p.opacity);
             ctx.fill();
           });
       }
@@ -644,7 +688,16 @@ function CanvasAnimation({ type, size }: { type: AnimationType; size: number }) 
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [type, size]);
+  }, [type, size, getMonochromeFill, getMonochromeStroke]);
+
+  // Theme-aware background gradient
+  const backgroundGradient = isLightMode
+    ? 'radial-gradient(circle at 50% 40%, #ffffff, #f5f5f5 66%, #ebebeb 100%)'
+    : 'radial-gradient(circle at 50% 40%, #1a1a1a, #0a0a0a 66%, #0f0f0f 100%)';
+
+  const boxShadow = isLightMode
+    ? 'inset 0 -10px 30px rgba(0, 0, 0, 0.05)'
+    : 'inset 0 -10px 30px rgba(0, 0, 0, 0.3)';
 
   return (
     <div
@@ -652,8 +705,8 @@ function CanvasAnimation({ type, size }: { type: AnimationType; size: number }) 
       style={{
         width: size,
         height: size,
-        background: 'radial-gradient(circle at 50% 40%, #1a1a1a, #0a0a0a 66%, #0f0f0f 100%)',
-        boxShadow: 'inset 0 -10px 30px rgba(0, 0, 0, 0.3)',
+        background: backgroundGradient,
+        boxShadow: boxShadow,
       }}
     >
       <canvas
@@ -664,7 +717,7 @@ function CanvasAnimation({ type, size }: { type: AnimationType; size: number }) 
       />
     </div>
   );
-}
+});
 
 export default function AvatarSelector({ size = "180px", className = "" }: AvatarSelectorProps) {
   const [mounted, setMounted] = useState(false);

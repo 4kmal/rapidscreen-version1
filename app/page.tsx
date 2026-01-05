@@ -137,24 +137,15 @@ export default function StyleGuidePage() {
         {/* Header/Navigation Section */}
         <HeaderDropdownWrapper />
         
-        <div className="sticky top-0 left-0 w-full z-[101] bg-background-base header">
-          <div className="absolute top-0 cmw-container border-x border-border-faint h-full pointer-events-none" />
+        <HeaderWrapper>
+          <div className="flex gap-24 items-center">
+            <HeaderBrandKit />
+          </div>
           
-          <div className="h-1 bg-border-faint w-full left-0 -bottom-1 absolute" />
-          
-          
-          <HeaderWrapper>
-            <div className="max-w-[900px] mx-auto w-full flex justify-between items-center">
-              <div className="flex gap-24 items-center">
-                <HeaderBrandKit />
-              </div>
-              
-              <div className="flex gap-8 items-center">
-                <SettingsPanel />
-              </div>
-            </div>
-          </HeaderWrapper>
-        </div>
+          <div className="flex gap-8 items-center">
+            <SettingsPanel />
+          </div>
+        </HeaderWrapper>
 
         {/* Hero Section */}
         <section className="overflow-x-clip" id="home-hero">

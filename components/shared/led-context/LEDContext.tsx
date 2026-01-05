@@ -39,7 +39,7 @@ export function LEDProvider({ children }: { children: ReactNode }) {
     duration: 12.5,
     bgLight: 0.15,
     scale: 1,
-    text: "cogito ergo sum",
+    text: "Innovate, Execute, Iterate",
     font: "space-grotesk",
     textTransform: "capitalize",
     fontSize: 40,

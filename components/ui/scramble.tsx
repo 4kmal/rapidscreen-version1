@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useState, useCallback, useRef } from "react"
 import { motion } from "framer-motion"
 import { cn } from "@/utils/cn"
 
@@ -12,6 +12,17 @@ interface ScrambleHoverProps {
   sequential?: boolean
   revealDirection?: "start" | "end" | "center"
   useOriginalCharsOnly?: boolean
+  characters?: string
+  className?: string
+  scrambledClassName?: string
+}
+
+interface ScrambleTextProps {
+  text: string
+  scrambleSpeed?: number
+  maxIterations?: number
+  sequential?: boolean
+  revealDirection?: "start" | "end" | "center"
   characters?: string
   className?: string
   scrambledClassName?: string
@@ -152,6 +163,116 @@ export const ScrambleHover: React.FC<ScrambleHoverProps> = ({
           <span
             key={index}
             className={cn(revealedIndices.has(index) || !isScrambling || !isHovering ? className : scrambledClassName)}
+          >
+            {char}
+          </span>
+        ))}
+      </span>
+    </motion.span>
+  )
+}
+
+// ScrambleText - triggers scramble animation when text prop changes
+export const ScrambleText: React.FC<ScrambleTextProps> = ({
+  text,
+  scrambleSpeed = 30,
+  maxIterations = 12,
+  sequential = true,
+  revealDirection = "start",
+  characters = SCRAMBLE_CHARS,
+  className,
+  scrambledClassName,
+}) => {
+  const [displayText, setDisplayText] = useState(text)
+  const [isScrambling, setIsScrambling] = useState(false)
+  const [revealedIndices, setRevealedIndices] = useState<Set<number>>(new Set())
+  const previousText = useRef(text)
+  const maxLength = useRef(text.length)
+
+  useEffect(() => {
+    // Only trigger scramble when text actually changes
+    if (previousText.current === text) return
+    
+    previousText.current = text
+    maxLength.current = Math.max(maxLength.current, text.length)
+    
+    let interval: NodeJS.Timeout
+    setIsScrambling(true)
+    setRevealedIndices(new Set())
+
+    const getNextIndex = (revealed: Set<number>) => {
+      const textLength = text.length
+      switch (revealDirection) {
+        case "start":
+          return revealed.size
+        case "end":
+          return textLength - 1 - revealed.size
+        case "center":
+          const middle = Math.floor(textLength / 2)
+          const offset = Math.floor(revealed.size / 2)
+          const nextIndex = revealed.size % 2 === 0 ? middle + offset : middle - offset - 1
+          if (nextIndex >= 0 && nextIndex < textLength && !revealed.has(nextIndex)) {
+            return nextIndex
+          }
+          for (let i = 0; i < textLength; i++) {
+            if (!revealed.has(i)) return i
+          }
+          return 0
+        default:
+          return revealed.size
+      }
+    }
+
+    const shuffleText = (targetText: string, revealed: Set<number>) => {
+      const availableChars = characters.split("")
+      return targetText
+        .split("")
+        .map((char, i) => {
+          if (char === " ") return " "
+          if (revealed.has(i)) return targetText[i]
+          return availableChars[Math.floor(Math.random() * availableChars.length)]
+        })
+        .join("")
+    }
+
+    let currentRevealed = new Set<number>()
+    
+    interval = setInterval(() => {
+      if (sequential) {
+        if (currentRevealed.size < text.length) {
+          const nextIndex = getNextIndex(currentRevealed)
+          currentRevealed = new Set(currentRevealed)
+          currentRevealed.add(nextIndex)
+          setRevealedIndices(new Set(currentRevealed))
+          setDisplayText(shuffleText(text, currentRevealed))
+        } else {
+          clearInterval(interval)
+          setIsScrambling(false)
+          setDisplayText(text)
+        }
+      } else {
+        setDisplayText(shuffleText(text, currentRevealed))
+      }
+    }, scrambleSpeed)
+
+    return () => {
+      if (interval) clearInterval(interval)
+    }
+  }, [text, characters, scrambleSpeed, sequential, revealDirection, maxIterations])
+
+  return (
+    <motion.span
+      className={cn("inline-block whitespace-pre-wrap", className)}
+      layout
+    >
+      <span className="sr-only">{text}</span>
+      <span aria-hidden="true">
+        {displayText.split("").map((char, index) => (
+          <span
+            key={index}
+            className={cn(
+              revealedIndices.has(index) || !isScrambling ? className : scrambledClassName
+            )}
           >
             {char}
           </span>

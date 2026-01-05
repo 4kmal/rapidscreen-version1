@@ -5,6 +5,7 @@ import { Roboto_Mono } from "next/font/google";
 import ColorStyles from "@/components/shared/color-styles/color-styles";
 import Scrollbar from "@/components/ui/scrollbar";
 import { ThemeProvider } from "@/components/shared/theme-provider";
+import { SoundProvider } from "@/components/shared/sound-context/SoundContext";
 import "styles/main.css";
 
 const robotoMono = Roboto_Mono({
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
   title: "RapidScreen Advanced Technology",
   description: "UI components and design system for Firecrawl",
   icons: {
-    icon: "/kd.jpg",
+    icon: "/rapidfavi.svg",
   },
 };
 
@@ -47,8 +48,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <main className="overflow-x-clip">{children}</main>
-          <Scrollbar />
+          <SoundProvider>
+            <main className="overflow-x-clip">{children}</main>
+            <Scrollbar />
+          </SoundProvider>
         </ThemeProvider>
       </body>
     </html>

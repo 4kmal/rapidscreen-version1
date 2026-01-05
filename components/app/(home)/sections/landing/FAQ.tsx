@@ -2,8 +2,9 @@
 
 import { Plus, Minus } from 'lucide-react';
 import { useState } from 'react';
-import { ScrambleHover } from '@/components/ui/scramble';
+import { ScrambleText } from '@/components/ui/scramble';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useSound } from '@/components/shared/sound-context/SoundContext';
 
 type FAQSection = "suara" | "krackeddev" | "general" | "gde";
 
@@ -182,7 +183,7 @@ const faqSections: Record<FAQSection, { title: string; categories: { category: s
     ]
   },
   gde: {
-    title: "GDE Solutions",
+    title: "I.G.M.E",
     categories: [
       {
         category: "Overview",
@@ -270,19 +271,34 @@ const sectionLabels: Record<FAQSection, string> = {
   suara: "Suara",
   krackeddev: "KrackedDev",
   general: "General",
-  gde: "GDE Solutions"
+  gde: "I.G.M.E"
 };
 
 export default function FAQSection() {
   const [activeSection, setActiveSection] = useState<FAQSection>("general");
+  const { playClick } = useSound();
 
   const currentData = faqSections[activeSection];
 
   return (
-    <section className="bg-background-base text-accent-black font-sans relative overflow-hidden border-t border-border-faint">
+    <section className="bg-background-base text-accent-black font-sans relative overflow-hidden border-t-2 border-border-muted">
+       {/* Diagonal Lines Background - CSS gradient instead of 300 divs */}
+       <div 
+         className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none"
+         style={{
+           backgroundImage: `repeating-linear-gradient(
+             -45deg,
+             transparent,
+             transparent 20px,
+             rgba(55,50,47,0.025) 20px,
+             rgba(55,50,47,0.025) 21px
+           )`
+         }}
+       />
+
        {/* Full-height border lines */}
-       <div className="absolute inset-0 pointer-events-none">
-         <div className="container mx-auto h-full max-w-[900px] border-x border-border-faint" />
+       <div className="absolute inset-0 pointer-events-none z-[1]">
+         <div className="container mx-auto h-full max-w-[900px] border-x-2 border-border-muted" />
        </div>
 
        {/* Background Grid Pattern (Simplified for context) */}
@@ -314,11 +330,14 @@ export default function FAQSection() {
             {sectionOrder.map((section) => (
               <button
                 key={section}
-                onClick={() => setActiveSection(section)}
+                onClick={() => {
+                  playClick();
+                  setActiveSection(section);
+                }}
                 className="px-4 py-1 rounded-full flex justify-center items-center transition-colors duration-300 relative z-10"
               >
                 <span
-                  className={`text-[13px] font-medium leading-5 transition-colors duration-300 whitespace-nowrap ${
+                  className={`text-[13px] font-medium leading-5 transition-colors duration-300 whitespace-nowrap uppercase tracking-wide ${
                     activeSection === section ? "text-accent-black" : "text-black-alpha-48"
                   }`}
                 >
@@ -332,24 +351,36 @@ export default function FAQSection() {
         {/* Section Header */}
         <div className="mb-16 md:mb-24 relative">
             {/* Headline */}
-            <div className="flex flex-col items-center text-center gap-4">
+            <div className="flex flex-col items-center text-center gap-2">
                 <h2 className="text-4xl md:text-5xl lg:text-[56px] font-bold leading-[1.1] tracking-tight text-accent-black uppercase">
-                What our clients <span className="text-heat-100"><ScrambleHover text="frequently ask" /></span>
+                  Frequently Asked Questions
                 </h2>
-                <p className="text-lg md:text-xl text-muted-foreground max-w-2xl font-light mx-auto">
+                <span 
+                  className="text-4xl md:text-5xl lg:text-[56px] font-bold leading-[1.1] tracking-tight text-heat-100 uppercase"
+                  style={{ fontFamily: "'Departure Mono', monospace" }}
+                >
+                  <ScrambleText 
+                    text={sectionLabels[activeSection]} 
+                    scrambleSpeed={25}
+                    maxIterations={15}
+                    sequential={true}
+                    revealDirection="start"
+                  />
+                </span>
+                <p className="text-lg md:text-xl text-muted-foreground max-w-2xl font-light mx-auto mt-2">
                 Explore our FAQs and find the answers you need about Rapidscreen.
                 </p>
             </div>
         </div>
 
         {/* FAQ List */}
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="popLayout">
           <motion.div 
             key={activeSection}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.15 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.1 }}
             className="flex flex-col gap-12"
           >
             {currentData.categories.map((categoryGroup) => (
@@ -379,51 +410,52 @@ export default function FAQSection() {
 
 function FAQCard({ question, answer, index }: { question: string, answer: string, index: number }) {
   const [isOpen, setIsOpen] = useState(false);
+  const { playToggleOn, playToggleOff } = useSound();
 
   return (
     <motion.div
-      className="rounded-2xl border border-border-faint bg-black-alpha-2 p-6 shadow-sm transition-all duration-300 hover:border-heat-100/30 cursor-pointer group"
-      initial={{ opacity: 0, y: 10 }}
+      className="rounded-2xl border border-border-faint bg-black-alpha-2 p-6 shadow-sm transition-colors duration-150 hover:border-heat-100/30 cursor-pointer group"
+      initial={{ opacity: 0, y: 8 }}
       whileInView={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2, delay: index * 0.02 }}
-      viewport={{ once: true }}
-      whileHover={{ scale: 1.01 }}
-      whileTap={{ scale: 0.99 }}
-      onClick={() => setIsOpen(!isOpen)}
+      transition={{ duration: 0.15, delay: index * 0.015 }}
+      viewport={{ once: true, margin: "-50px" }}
+      onClick={() => {
+        isOpen ? playToggleOff() : playToggleOn();
+        setIsOpen(!isOpen);
+      }}
       role="button"
       tabIndex={0}
     >
       <div className="flex items-center justify-between gap-4">
-        <h3 className={`text-base md:text-lg font-medium transition-colors duration-300 ${isOpen ? 'text-heat-100' : 'text-accent-black group-hover:text-heat-100'}`}>
+        <h3 className={`text-base md:text-lg font-medium transition-colors duration-150 ${isOpen ? 'text-heat-100' : 'text-accent-black group-hover:text-heat-100'}`}>
           {question}
         </h3>
-        <motion.div
-          animate={{ rotate: isOpen ? 180 : 0 }}
-          transition={{ duration: 0.3, ease: "easeInOut" }}
-          className="flex-shrink-0 flex items-center justify-center"
+        <div 
+          className="flex-shrink-0 flex items-center justify-center transition-transform duration-200"
+          style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
         >
           {isOpen ? (
             <Minus className="text-heat-100" size={20} />
           ) : (
             <Plus className="text-black-alpha-40 group-hover:text-heat-100 transition-colors" size={20} />
           )}
-        </motion.div>
+        </div>
       </div>
 
-      <AnimatePresence>
+      <AnimatePresence initial={false}>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0, marginTop: 0 }}
-            animate={{ opacity: 1, height: "auto", marginTop: 16 }}
-            exit={{ opacity: 0, height: 0, marginTop: 0 }}
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
             transition={{
-              duration: 0.4,
-              ease: "easeInOut",
-              opacity: { duration: 0.2 },
+              duration: 0.2,
+              ease: [0.25, 0.1, 0.25, 1],
+              opacity: { duration: 0.1 },
             }}
             className="overflow-hidden"
           >
-            <p className="text-base leading-relaxed text-black-alpha-64 whitespace-pre-line border-t border-border-faint pt-4">
+            <p className="text-base leading-relaxed text-black-alpha-64 whitespace-pre-line border-t border-border-faint pt-4 mt-4">
               {answer}
             </p>
           </motion.div>
