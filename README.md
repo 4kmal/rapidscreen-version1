@@ -44,7 +44,7 @@
 bun install
 ```
 
-2. Lol
+2. Lol.exe
 ```
 
 3. **Run the development server:**
