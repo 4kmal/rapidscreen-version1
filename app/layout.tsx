@@ -16,9 +16,47 @@ const robotoMono = Roboto_Mono({
 
 export const metadata: Metadata = {
   title: "RapidScreen Advanced Technology",
-  description: "UI components and design system for Firecrawl",
+  description: "Malaysia's no.1 AI Solutions & Infrastructure Provider : My SUARA, Krackeddevs, My PETA",
+  keywords: ["AI Solutions", "Malaysia", "Infrastructure Provider", "My SUARA", "Krackeddevs", "My PETA", "RapidScreen", "Advanced Technology"],
+  authors: [{ name: "RapidScreen" }],
+  creator: "RapidScreen",
+  publisher: "RapidScreen",
+  metadataBase: new URL("https://rapidskreen.vercel.app"),
   icons: {
     icon: "/rapidfavi.svg",
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_MY",
+    url: "https://rapidskreen.vercel.app",
+    siteName: "RapidScreen",
+    title: "RapidScreen Advanced Technology",
+    description: "Malaysia's no.1 AI Solutions & Infrastructure Provider : My SUARA, Krackeddevs, My PETA",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "RapidScreen Advanced Technology",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "RapidScreen Advanced Technology",
+    description: "Malaysia's no.1 AI Solutions & Infrastructure Provider : My SUARA, Krackeddevs, My PETA",
+    images: ["/og-image.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
 };
 
